@@ -71,8 +71,6 @@ def get_visarule_case(indices):
             res += str(st.session_state.visarule_data[st.session_state.visarule_titles[85]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[86]]) + "\n"
     return res
 #08/07에 발급, 일주일 후 만료
-client_id = '1f6fc21d-e1b4-4a8c-b0b0-dcbd559d7297'
-client_secret = '2558d9c9-13d9-4638-8018-51f83a4aab7e'
 token = ""
 token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlX3R5cGUiOiIxIiwic2NvcGUiOlsicmVhZCJdLCJzZXJ2aWNlX25vIjoiMDAwMDA0NDI0MDAyIiwiZXhwIjoxNzIzNjI0NTYzLCJhdXRob3JpdGllcyI6WyJJTlNVUkFOQ0UiLCJQVUJMSUMiLCJCQU5LIiwiRVRDIiwiU1RPQ0siLCJDQVJEIl0sImp0aSI6ImRlZGFkMzNjLWYwY2QtNGQ4OS04NDYwLWQwOWMzOWY2M2IwYyIsImNsaWVudF9pZCI6IjFmNmZjMjFkLWUxYjQtNGE4Yy1iMGIwLWRjYmQ1NTlkNzI5NyJ9.B-oxznVbVLh8IAJ8PhaWLJfMSb0qr18NZEt37HssCi3QFk7rTHYqCs4AOynhe_nSmL9oRTL6uHIRvAjVE4fOQVzypZN8BLAheTAiWjhNp7LuNjfGPUQibKN3dLAi4xW0kRm88w1bqRwSjtjRXk0gaV2OLAwkof6YYZ3Kmm10FTdRSy4Yf98MAbTyEo9MPOOzAm5n5f1QzrZrA57sddKb-foGbMBZk1OdL3GjkCOhk6zUKvjmVBM23fOnBIKuYPcZWB98IRhbIO_kI1ZXJePD1zTlBQKH9FxKy2yLvXO8to3AAgAsGEZTXgpIp_DWp6wXwwWAKlCL0O919IX_lF8Vlw'
 #api 호출을 원하면 token의 주석을 해제하고 사용하세요
