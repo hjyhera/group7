@@ -9,7 +9,6 @@ from openai import OpenAI
 import base64
 import json
 import urllib.parse
-import setuptools.dist
 
 
 cur_visa = "e9 VISA"
@@ -26,8 +25,7 @@ if 'changevisa' not in st.session_state:
 
 if 'result' not in st.session_state:
     st.session_state.result = False
-if 'flag2' not in st.session_state:
-    st.session_state.flag2 = "0"
+
 
 
 #08/07에 발급, 일주일 후 만료
@@ -150,7 +148,7 @@ else:
     if st.session_state.country:
         def translate(msg):
             client = OpenAI(api_key=openai_api_key)
-            message = "translate " + msg + " into " + st.session_state.country + "'s language each in comma units and only tell me that translation separated by commas. " 
+            message = "Translate the following comma-separated list " + msg + " into " + st.session_state.country + "'s language. Provide the translation as a comma-separated list without any spaces. " 
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
