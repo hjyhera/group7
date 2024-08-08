@@ -162,7 +162,7 @@ else:
         if 'translations' not in st.session_state:
             st.session_state.translations = {}
             st.session_state.translations['nationality_translation'] = translate("0:러시아,1:몽골,2:미국,3:베트남,4:인도,5:인도네시아,6:일본,7:중국,8:태국,9:필리핀,10:한국계 러시아인,11:한국계 중국인,99:기타,국적,상담결과보기,다시 채팅하기")
-            st.session_state.translations['button'] = translate("상담 결과보기, 다시 채팅하기, 비자 점수 측정하기")
+            st.session_state.translations['button'] = translate("상담 결과보기, 다시 채팅하기, 비자 점수 측정하기, 조회 중..., 당신은 현재 체류중인 외국인이 아닙니다., 모든 정보를 입력해주세요.,제출, 점수")
             st.session_state.button = st.session_state.translations['button'].split(",")
 
         def get_passport_expiry(info):
@@ -227,7 +227,7 @@ else:
             
             # 조회
             if st.button(st.session_state.translations['expire']):
-                with st.spinner(translate("조회 중...")):
+                with st.spinner(st.session_state.button[3]):
                     if st.session_state.passport_no and st.session_state.nationality and st.session_state.birth_date:
                         info = {
                             "organization": "0001",
@@ -241,9 +241,9 @@ else:
                             st.success(translate(f"체류만료일: {expiry_date}"))
                             st.session_state.expiry_date = expiry_date
                         else:
-                            st.error(translate("당신은 현재 체류중인 외국인이 아닙니다."))
+                            st.error(st.session_state.button[4])
                     else:
-                        st.error(translate("모든 정보를 입력해주세요."))
+                        st.error(st.session_state.button[5])
 
 
         def user_info():
@@ -485,14 +485,12 @@ else:
                 elif minus3_num == "3회 ~ ":
                     st.session_state.score -= 15
 
-            submitted = st.button("Submit/제출", type = "primary")
+            submitted = st.button(st.session_state.button[6], type = "primary")
             if submitted:                  
                 with st.chat_message("assistant", avatar="😮"):
-                    st.markdown("점수/score : "+ str(st.session_state.score))
+                    st.markdown(st.session_state.button[7]+ str(st.session_state.score))
                 st.session_state.flag = "3"
-                if 'result' not in st.session_state.translations:
-                    st.session_state.translations['result'] = translate("상담결과보기")
-                st.session_state.result = st.button(st.session_state.translations['result'], type = "primary")
+                st.session_state.result = st.button(st.session_state.button[0], type = "primary")
                 if st.session_state.result:
                     st.rerun()
                 return st.session_state.score
