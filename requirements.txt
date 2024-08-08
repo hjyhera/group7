@@ -1,5 +1,5 @@
 streamlit
 openai
-numpy
+numpy==1.23.5
 faiss-cpu
 requests
