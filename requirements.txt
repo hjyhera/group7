@@ -1,2 +1,7 @@
 streamlit
 openai
+numpy
+faiss
+requests
+json
+urllib.parse
