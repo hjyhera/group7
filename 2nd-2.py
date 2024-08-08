@@ -15,7 +15,7 @@ cur_visa = "e9 VISA"
 if 'expiry_date' not in st.session_state:
     st.session_state.expiry_date = 0
 if 'score' not in st.session_state:
-    st.session_state.score = 0
+    st.session_state.score = 800
 st.session_state.visarule = ["E-9 비자로 변경하기 위해서는 조건 점수가 400점 이상이어야 합니다.", "E-7-4 비자로 변경하기 위해서는 조건 점수가 800점 이상이어야 합니다.", "점수 조건을 만족하지 못하거나 제외대상자에 해당할 경우, 비자 변경이 어렵습니다."]
 st.session_state.read_consulting_result = [{"content": "외국인 배우자와 혼인신고 및 초청 도와주세요", "result":"처음부터 필리핀 주재 한국대사관에 방문하여 혼인신고를 하였더라면 더욱 간단하게 민원업무처리가 되었을 것"},{"content": "미국에서 온 남성의 체류문제" , "result":"가족관계증명서 서류를 준비해서 해결됨"},{"content":"E-9비자에서 E-7-4로 변경하기", "result":"한국어 점수를 높여서 조건점수를 만족시켜서 비자를 변경할 수 있게 됨"},{"content": "제조업에 종사하는 여성의 비자 연장", "result":"보건증을 발급하여 해결됨"}]
 if 'visacase' not in st.session_state:
@@ -606,14 +606,17 @@ else:
         def get_answer():
             client = OpenAI(api_key=openai_api_key)
             
-            #점수 기준을 만족하는지의 여부 변수로 설정(get_score함수->score 점수 값으로 변경)
-            if st.session_state.score > 200 :
-                st.session_state.score_b = True
-            else:
-                st.session_state.score_b = False
+            qualifypoint = False
+            assistant_data =""
             
-            #대상자인지 제외대상인지 확인(함수명 임의로 작성)
-            #st.session_state.subject = get_qualification()
+            #점수 기준을 만족하는지의 여부 변수로 설정(get_score함수->score 점수 값으로 변경)
+            if st.session_state.score >= 200 and st.session_state.score <= 800 :
+                st.session_state.score_b = '1'
+            elif st.session_state.score < 200:
+                st.session_state.score_b = '2'
+            else:
+                st.session_state.score_b = '0'
+            
             
             #피상담자의 상황(국가, 현재 비자, 체류 기간, 업종)
             st.session_state.subjectcase = f"국가: {st.session_state.country}, 현재 비자: {st.session_state.visa_info}, 변경을 원하는 비자: {st.session_state.visacase}, 체류 만료일: {st.session_state.expiry_date}, 업종: {st.session_state.work}"
@@ -621,7 +624,7 @@ else:
             
             #제외대상자도 아니고, 점수 요건을 만족하는 경우, 
             #비자변경 pdf가 ocr 처리되어 왔다고 가정(road_visa 함수) 후 임배딩, 원하는 비자 변경 case 역시 query 임배딩(2번 프로그램에서 받은 변경하고자 하는 비자 또는 추천받은 비자)
-            if st.session_state.subject and st.session_state.score_b:
+            if st.session_state.subject and st.session_state.score_b == '1':
                 #visa_rule 임배딩
                 #db_vectors = get_embedding(road_visa())
                 db_vectors = []
@@ -634,15 +637,18 @@ else:
                 
                 k = 1
                 distances, indices = index.search(query,k)
-                assistant_data = f"The processing manual for the visa that needs to be changed is {st.session_state.visarule[indices[0][0]]}. Since this person has satisfied all the conditions for changing, can you tell me what documents I need to prepare now?"
+                qualifypoint = True
+                
+                visarule_data = f"I will tell you the current conditions and circumstances of the user and the policy related to the visa that the user wants to change. \
+                                The processing manual for the visa that needs to be changed is {st.session_state.visarule[indices[0][0]]}. Can you tell me what documents the user need to prepare now?"
                 
             #제외 대상자이거나, 점수 요건을 만족하지 못하는 경우, 
             #상담사례가 크롤링 처리되어 왔다고 가정(read_consulting 함수, 리턴값:딕셔너리 리스트{content:, result:}) 후 임배딩, 피상담자의 상황 역시 query 임배딩(2번 프로그램에서 받은 변경하고자 하는 비자 또는 추천받은 비자) 
             else:
                 if st.session_state.subject == False:
-                    assistant_data = "This foreigner is currently excluded from visa change and cannot change his/her visa. This must be printed unconditionally."
-                if st.session_state.score == False:
-                    assistant_data = "Currently, this foreigner cannot change his/her visa because he/she does not meet the visa point requirement. If he/she also meets the visa change exclusion criteria, he/she cannot change his/her visa for both reasons. Please print this message unconditionally."
+                    assistant_data = "User is currently excluded from visa change and cannot change his/her visa. This must be printed."
+                if st.session_state.score_b == '2':
+                    assistant_data = "User cannot change his/her visa because he/she does not meet the visa point requirement. This must be printed."
                 
                 #consulting = read_consulting()
                 consulting = st.session_state.read_consulting_result
@@ -665,29 +671,20 @@ else:
                 k = 3
                 distances, indices = index.search(query,k)
                 indices_list = indices[0].tolist()
-                #for i in indices_list:
+                
+                
                 #    #상위 3개의 상담사례 content를 가져와서 프롬프팅하고 싶은데 어떻게 해야할지?
                 #    assistant_data = assistant_data + "지금 이 사람의 상황과 가장 유사한 3개의 상담사례를 가져왔어. 이 사례를 소개하고, 이 사람이 준비해볼만한 다른 비자를 알려주거나, 시도해볼만한 다른 방법을 알려줘"
                 
-                assistant_data += "이 외국인의 상황과 가장 유사한 3개의 상담사례를 가져왔습니다. 이 사례를 소개하고, 이 사람이 준비해볼만한 다른 비자를 알려주거나, 시도해볼만한 다른 방법을 알려주세요. 사례를 소개할 때 현재 상담자의 상황과 어떤 점이 비슷했는지도 설명해주세요."
+                assistant_data += "사용자의 상황과 가장 유사한 3개의 상담사례를 가져왔습니다. 이 사례를 소개하고, 이 사람이 준비해볼만한 다른 비자를 알려주거나, 시도해볼만한 다른 방법을 알려주세요. 사례를 소개할 때 현재 상담자의 상황과 어떤 점이 비슷했는지도 설명해주세요."
                 for i in indices_list:
                     case = consulting[i]
                     assistant_data += f"상담사례 {i+1}: 문제 - {case['content']}, 결과 - {case['result']} "
 
             language_message = f"지금부터 출력하는 언어는 모두 {st.session_state.country}의 언어로 출력해줘."                
             system_message = "You are a foreign job counselor working in Korea. The user is a foreigner who came to you for consultation. \
-                                You have to perform a consultation scenario with the user. The consultation response should start with whether the foreigner can change the desired visa under the current conditions and circumstances. \
-                                I will tell you the current conditions and circumstances of the foreigner and the policy related to the visa that the foreigner wants to change. " + assistant_data
+                                You have to perform a consultation scenario with the user. The consultation response should start with whether the foreigner can change the desired visa under the current conditions and circumstances. " 
             
-            stream = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": language_message},
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": st.session_state.subjectcase}
-                ],
-                stream = False
-            )
             
             bot_avatar_html = f'''
                 <div style="text-align: left;">
@@ -695,7 +692,45 @@ else:
                 </div>
                 '''
             st.markdown(bot_avatar_html, unsafe_allow_html=True)
-            st_message( stream.choices[0].message.content.strip(), avatar_style="no-avatar")
+            
+            #기본 상담
+            stream1 = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": language_message},
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": st.session_state.subjectcase}
+                ],
+                stream = False
+            )
+            st_message( stream1.choices[0].message.content.strip(), avatar_style="no-avatar")
+            
+            
+            #가능한 경우 visarule 바탕으로 서류 설명
+            if qualifypoint :
+                stream2 = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": language_message},
+                        {"role": "system", "content": visarule_data},
+                        {"role": "user", "content": st.session_state.subjectcase}
+                    ],
+                    stream = False
+                )
+                st_message( stream2.choices[0].message.content.strip(), avatar_style="no-avatar")
+                    
+            #불가능한 경우 assistant_data에 제공되는 상담 사례 설명       
+            if not(qualifypoint):
+                stream3 = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": language_message},
+                    {"role": "system", "content": assistant_data},
+                    {"role": "user", "content": st.session_state.subjectcase}
+                ],
+                stream = False
+                )
+                st_message( stream3.choices[0].message.content.strip(), avatar_style="no-avatar")
 
             return
 
