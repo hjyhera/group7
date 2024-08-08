@@ -17,7 +17,8 @@ if 'expiry_date' not in st.session_state:
 if 'score' not in st.session_state:
     st.session_state.score = 800
 st.session_state.visarule = ["E-9 비자로 변경하기 위해서는 조건 점수가 400점 이상이어야 합니다.", "E-7-4 비자로 변경하기 위해서는 조건 점수가 800점 이상이어야 합니다.", "점수 조건을 만족하지 못하거나 제외대상자에 해당할 경우, 비자 변경이 어렵습니다."]
-st.session_state.read_consulting_result = [{"content": "외국인 배우자와 혼인신고 및 초청 도와주세요", "result":"처음부터 필리핀 주재 한국대사관에 방문하여 혼인신고를 하였더라면 더욱 간단하게 민원업무처리가 되었을 것"},{"content": "미국에서 온 남성의 체류문제" , "result":"가족관계증명서 서류를 준비해서 해결됨"},{"content":"E-9비자에서 E-7-4로 변경하기", "result":"한국어 점수를 높여서 조건점수를 만족시켜서 비자를 변경할 수 있게 됨"},{"content": "제조업에 종사하는 여성의 비자 연장", "result":"보건증을 발급하여 해결됨"}]
+#st.session_state.read_consulting_result = [{"content": "외국인 배우자와 혼인신고 및 초청 도와주세요", "result":"처음부터 필리핀 주재 한국대사관에 방문하여 혼인신고를 하였더라면 더욱 간단하게 민원업무처리가 되었을 것"},{"content": "미국에서 온 남성의 체류문제" , "result":"가족관계증명서 서류를 준비해서 해결됨"},{"content":"E-9비자에서 E-7-4로 변경하기", "result":"한국어 점수를 높여서 조건점수를 만족시켜서 비자를 변경할 수 있게 됨"},{"content": "제조업에 종사하는 여성의 비자 연장", "result":"보건증을 발급하여 해결됨"}]
+st.session_state.read_consulting_result = []
 if 'visacase' not in st.session_state:
     st.session_state.visacase = ""
 if 'changevisa' not in st.session_state:
@@ -25,6 +26,18 @@ if 'changevisa' not in st.session_state:
 
 if 'result' not in st.session_state:
     st.session_state.result = False
+    
+#크롤링 데이터 st.session_state.read_consulting_result에 불러오기 
+with open("crawling_data.pickle", "rb") as f:
+    data = pickle.load(f)
+
+#print(data.keys())
+#print(data['중도 퇴사 후 근로소득 신고되지 않아 고용허가연장 안된 노동자 지원'])
+
+for i in data.keys():
+    cstContent, cstResult, cstLaw, cstEval = data[i]
+    dict = {"title": i, "content": cstContent, "result": cstResult, "law": cstLaw, "evaluation": cstEval}
+    st.session_state.read_consulting_result.append(dict)
 
 
 
@@ -647,15 +660,17 @@ else:
             else:
                 if st.session_state.subject == False:
                     assistant_data = "User is currently excluded from visa change and cannot change his/her visa. This must be printed."
+                    st.session_state.subjectcase += ", 제외 대상자: 해당"
                 if st.session_state.score_b == '2':
                     assistant_data = "User cannot change his/her visa because he/she does not meet the visa point requirement. This must be printed."
-                
+                    st.session_state.subjectcase += ", 점수 기준 미달 여부: 해당"
+                    
                 #consulting = read_consulting()
                 consulting = st.session_state.read_consulting_result
                 db_vectors = []
                 for each_data in consulting:
                     #임베딩 과정에 문제 상황과 답변을 다 포함시키기 위한 case 변수
-                    consulting_case = f"문제: {each_data['content']}, 결과: {each_data['result']}"
+                    consulting_case = f"상담 제목: {each_data['title']}, 상담 내용: {each_data['content']}, 상담 결과: {each_data['result']}, 관련 법령: {each_data['law']}, 평가 및 의의: {each_data['evaluation']}"
                     st.consulting_list = []
                     st.consulting_list.append(consulting_case)
                     #consulting 값을 딕셔너리와 임베딩 벡터가 모두 포함된 리스트로 변경
@@ -679,7 +694,7 @@ else:
                 assistant_data += "사용자의 상황과 가장 유사한 3개의 상담사례를 가져왔습니다. 이 사례를 소개하고, 이 사람이 준비해볼만한 다른 비자를 알려주거나, 시도해볼만한 다른 방법을 알려주세요. 사례를 소개할 때 현재 상담자의 상황과 어떤 점이 비슷했는지도 설명해주세요."
                 for i in indices_list:
                     case = consulting[i]
-                    assistant_data += f"상담사례 {i+1}: 문제 - {case['content']}, 결과 - {case['result']} "
+                    assistant_data += f"상담사례 {i+1}: 상담 제목 - {each_data['title']}, 상담 내용 - {each_data['content']}, 상담 결과 - {each_data['result']}, 관련 법령 - {each_data['law']}, 평가 및 의의 - {each_data['evaluation']} "
 
             language_message = f"지금부터 출력하는 언어는 모두 {st.session_state.country}의 언어로 출력해줘."                
             system_message = "You are a foreign job counselor working in Korea. The user is a foreigner who came to you for consultation. \
@@ -725,6 +740,7 @@ else:
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": language_message},
+                    {"role": "system", "content": "상담 사례를 구체적으로 설명해줘. 제목도 마음대로 바꾸지 말고, 어떤 상황에서 어떻게 해결이 된 건지 구체적으로 알려줘."},
                     {"role": "system", "content": assistant_data},
                     {"role": "user", "content": st.session_state.subjectcase}
                 ],
