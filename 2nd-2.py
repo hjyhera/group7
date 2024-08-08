@@ -148,7 +148,7 @@ else:
     if st.session_state.country:
         def translate(msg):
             client = OpenAI(api_key=openai_api_key)
-            message = "Translate the following comma-separated list " + msg + " into " + st.session_state.country + "'s language. Provide the translation as a comma-separated list without any spaces. " 
+            message = "Translate the following ';'-separated list " + msg + " into " + st.session_state.country + "'s language. Provide the translation as a ';'-separated list without any spaces. If there isn't any ';', then you don't have to split it into ';'" 
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -161,9 +161,9 @@ else:
 
         if 'translations' not in st.session_state:
             st.session_state.translations = {}
-            st.session_state.translations['nationality_translation'] = translate("0:러시아,1:몽골,2:미국,3:베트남,4:인도,5:인도네시아,6:일본,7:중국,8:태국,9:필리핀,10:한국계 러시아인,11:한국계 중국인,99:기타,국적,상담결과보기,다시 채팅하기")
-            st.session_state.translations['button'] = translate("상담 결과보기, 다시 채팅하기, 비자 점수 측정하기, 조회 중..., 당신은 현재 체류중인 외국인이 아닙니다., 모든 정보를 입력해주세요.,제출, 점수")
-            st.session_state.button = st.session_state.translations['button'].split(",")
+            st.session_state.translations['nationality_translation'] = translate("0:러시아;1:몽골;2:미국;3:베트남;4:인도;5:인도네시아;6:일본;7:중국;8:태국;9:필리핀;10:한국계 러시아인;11:한국계 중국인;99:기타;국적;상담결과보기;다시 채팅하기")
+            st.session_state.translations['button'] = translate("상담 결과보기; 다시 채팅하기; 비자 점수 측정하기; 조회 중...; 당신은 현재 체류중인 외국인이 아닙니다.; 모든 정보를 입력해주세요.;제출; 점수")
+            st.session_state.button = st.session_state.translations['button'].split(";")
 
         def get_passport_expiry(info):
             if token:
@@ -183,7 +183,7 @@ else:
 
             # 국적
             nationality_translation = st.session_state.translations['nationality_translation']
-            nationality_translation = nationality_translation.split(",")
+            nationality_translation = nationality_translation.split(";")
             # 국적
             if nationality := st.selectbox('🌏'+nationality_translation[13], [
                 nationality_translation[0], nationality_translation[1],
@@ -259,8 +259,8 @@ else:
                 st.session_state.work = ""
             if 'init2' not in st.session_state:
                 st.session_state.init2 = 1
-                user_info_translation = translate("현재 비자가 있나요?,있음,없음, 현재 비자는 무엇입니까?,체류만료일을 조회하세요!,체류만료일 조회,한국 방문 목적을 입력하세요!,희망하는 직업/분야를 입력하세요!,여권 번호,국적,나라명,생년월일,정보를 입력하세요:")
-                user_info_translation = user_info_translation.split(",")
+                user_info_translation = translate("현재 비자가 있나요?;있음;없음; 현재 비자는 무엇입니까?;체류만료일을 조회하세요!;체류만료일 조회;한국 방문 목적을 입력하세요!;희망하는 직업/분야를 입력하세요!;여권 번호;국적;나라명;생년월일;정보를 입력하세요:")
+                user_info_translation = user_info_translation.split(";")
                 st.session_state.translations['visa'] = user_info_translation[0]
                 st.session_state.translations['yes'] = user_info_translation[1]
                 st.session_state.translations['no'] = user_info_translation[2]
@@ -328,8 +328,8 @@ else:
                 st.session_state.messages = []
             if 'init' not in st.session_state:
                 st.session_state.init = 1
-                get_score_translation = translate("최근 2년 간의 연간 평균 소득을 선택해주세요(2년 간의 총 소득 / 2),한국어 능력 자격증(TOPIK/KIIP/사전평가) 급수를 선택해주세요,나이를 선택해주세요,가점에 해당되는 요소가 있다면 입력해주세요,중앙부처 추천,광역지자체 추천,고용기업 추천,현 근무처 3년 이상 근속,인구감소 지역 및 읍면 지역 3년 이상 근무,자격증 또는 국내 학위,국내 면허,감점에 해당되는 요소가 있다면 입력해주세요,벌금 100만원 미만의 형을 받은 자,체납으로 체류허가 제한을 받은 사실이 있는 자,출입국관리법 3회 이하 위반자로 행정처분을 받은 자")
-                get_score_translation = get_score_translation.split(",")
+                get_score_translation = translate("최근 2년 간의 연간 평균 소득을 선택해주세요(2년 간의 총 소득 / 2);한국어 능력 자격증(TOPIK/KIIP/사전평가) 급수를 선택해주세요;나이를 선택해주세요;가점에 해당되는 요소가 있다면 입력해주세요;중앙부처 추천;광역지자체 추천;고용기업 추천;현 근무처 3년 이상 근속;인구감소 지역 및 읍면 지역 3년 이상 근무;자격증 또는 국내 학위;국내 면허;감점에 해당되는 요소가 있다면 입력해주세요;벌금 100만원 미만의 형을 받은 자;체납으로 체류허가 제한을 받은 사실이 있는 자;출입국관리법 3회 이하 위반자로 행정처분을 받은 자")
+                get_score_translation = get_score_translation.split(";")
                 st.session_state.translations['income'] = get_score_translation[0]
                 st.session_state.translations['korean_ability'] = get_score_translation[1]
                 st.session_state.translations['age'] = get_score_translation[2]
