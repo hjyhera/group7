@@ -740,7 +740,7 @@ else:
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": language_message},
-                    {"role": "system", "content": "상담 사례를 구체적으로 설명해줘. 제목도 마음대로 바꾸지 말고, 어떤 상황에서 어떻게 해결이 된 건지 구체적으로 알려줘."},
+                    {"role": "system", "content": "Please describe the consultation case specifically. Please include the title or content of the consultation, the result, the law, and the evaluation. Please be specific about the situation and how it was resolved."},
                     {"role": "system", "content": assistant_data},
                     {"role": "user", "content": st.session_state.subjectcase}
                 ],
