@@ -2,6 +2,6 @@ pip==24.2
 streamlit
 openai
 numpy==1.23.5
-faiss-cpu
+faiss-cpu==1.7.3
 requests
 setuptools
