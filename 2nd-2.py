@@ -11,13 +11,18 @@ import json
 import urllib.parse
 from streamlit_chat import message as st_message
 
-cur_visa = "e9 VISA"
 if 'expiry_date' not in st.session_state:
     st.session_state.expiry_date = 0
 if 'score' not in st.session_state:
     st.session_state.score = 800
-st.session_state.visarule = ["E-9 비자로 변경하기 위해서는 조건 점수가 400점 이상이어야 합니다.", "E-7-4 비자로 변경하기 위해서는 조건 점수가 800점 이상이어야 합니다.", "점수 조건을 만족하지 못하거나 제외대상자에 해당할 경우, 비자 변경이 어렵습니다."]
-#st.session_state.read_consulting_result = [{"content": "외국인 배우자와 혼인신고 및 초청 도와주세요", "result":"처음부터 필리핀 주재 한국대사관에 방문하여 혼인신고를 하였더라면 더욱 간단하게 민원업무처리가 되었을 것"},{"content": "미국에서 온 남성의 체류문제" , "result":"가족관계증명서 서류를 준비해서 해결됨"},{"content":"E-9비자에서 E-7-4로 변경하기", "result":"한국어 점수를 높여서 조건점수를 만족시켜서 비자를 변경할 수 있게 됨"},{"content": "제조업에 종사하는 여성의 비자 연장", "result":"보건증을 발급하여 해결됨"}]
+#st.session_state.visarule = ["E-9 비자로 변경하기 위해서는 조건 점수가 400점 이상이어야 합니다.", "E-7-4 비자로 변경하기 위해서는 조건 점수가 800점 이상이어야 합니다.", "점수 조건을 만족하지 못하거나 제외대상자에 해당할 경우, 비자 변경이 어렵습니다."]
+if 'visarule' not in st.session_state:
+    st.session_state.visarule = ""
+    with open('visarule.pickle', 'rb') as f:
+        st.session_state.visarule_data = pickle.load(f)
+    st.session_state.visarule_titles = list(st.session_state.visarule_data.keys())
+    st.session_state.visarule_titles = st.session_state.visarule_titles[:90]
+
 st.session_state.read_consulting_result = []
 if 'visacase' not in st.session_state:
     st.session_state.visacase = ""
@@ -40,7 +45,31 @@ for i in data.keys():
     st.session_state.read_consulting_result.append(dict)
 
 
-
+def get_visarule_case(indices):
+    # '외교(A-1)', '공무(A-2)', '협정(A-3)', ' 협정(A-3)자격 소지자의 체류자격외 활동 범위', '사증면제(B-1)', '관광통과(B-2)', '일시취재(C-1)', '단기방문(C-3)', '단기취업(C-4)', '문화예술(D-1)', '유학(D-2)', '외국인유학생 시간제 취업(아르바이트)', '산업연수(D-3)', '일반연수(D-4)', '취재(D-5)', '종 교(D-6)', '주 재(D-7)', '필수전문인력', '기업투자(D-8)', '개인 납세사실증명원', '무역경영(D-9)', '구직(D-10)', '교 수(E-1)', '회화지도(E-2)', '연 구(E-3)', '기술지도(E-4)', '전문직업(E-5)', '예술흥행(E-6)',
+    #  '특정활동(E-7)', '계절근로(E-8)', '비전문취업(E-9)', '선원취업(E-10)', '방문동거(F-1)', '거 주(F-2)', 'F-2-8', '공익사업투자 외국인에 대한 거주(F-2-9) 체류자격 변경허가', '동반(F-3)', '영 주(F-5)', '결혼이민(F-6)', '기 타(G-1)', '1. 산재보상진행 불법체류자등에 대한 기타(G-1-1) 체류자격 변경허가', '관광취업(H-1)'
+    #제목이 내용 보다 1단계 느림(적음), 제목 + 1 = 내용
+    res = ""
+    for i in indices[0]:
+        if i in [10, 11, 14, 15, 16, 17, 18, 19, 22, 23, 24, 25, 30, 31, 32, 33, 34, 35, 36, 37, 76, 77, 78, 79, 83, 84, 85, 88]: 
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[i-1]]) + "\n"
+        if i == 12 or i== 13: #협정(A-3), 협정(A-3)자격 소지자의 체류자격외 활동 범위
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[11]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[12]]) + "\n"
+        elif i == 20 or i == 21: #유학(D-2)
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[19]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[20]]) + "\n"
+        elif i == 26 or i == 27: #주 재(D-7)
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[25]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[26]]) + "\n"
+        elif i == 28 or i == 29: #기업투자(D-8), 개인 납세사실증명원
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[27]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[28]]) + "\n"
+        elif i >= 38 and i <= 75:  #특정활동(E-7)
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[37]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[38]]) + "\n"
+            if i >= 40 and i <= 75:
+                res += str(st.session_state.visarule_data[st.session_state.visarule_titles[i-1]]) + "\n"
+        elif i == 80 or i == 81 or i == 82: #거 주(F-2), F-2-8, 공익사업투자 외국인에 대한 거주(F-2-9) 체류자격 변경허가
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[79]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[80]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[81]]) + "\n"
+        elif i == 86 or i == 87: #기 타(G-1), 1. 산재보상진행 불법체류자등에 대한 기타(G-1-1) 체류자격 변경허가
+            res += str(st.session_state.visarule_data[st.session_state.visarule_titles[85]]) + "\n" + str(st.session_state.visarule_data[st.session_state.visarule_titles[86]]) + "\n"
+    return res
 #08/07에 발급, 일주일 후 만료
 client_id = '1f6fc21d-e1b4-4a8c-b0b0-dcbd559d7297'
 client_secret = '2558d9c9-13d9-4638-8018-51f83a4aab7e'
@@ -491,7 +520,7 @@ else:
             response_check = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": check_sys +  "사용자의 현재 비자:"+cur_visa + "사용자의 사용 언어:"+st.session_state.country}] +
+                    {"role": "system", "content": check_sys +  "사용자의 현재 비자:"+st.session_state.visa_info + "사용자의 사용 언어:"+st.session_state.country}] +
                     [{"role": "user", "content": msg}
                 ],
                 stream=False,
@@ -499,20 +528,27 @@ else:
             response_check_msg = response_check.choices[0].message.content
             return response_check_msg
 
-
+        def get_embedding(input):
+            client = OpenAI(api_key=openai_api_key)
+            reponse = client.embeddings.create(
+                input = input,
+                model = "text-embedding-3-small"
+            )
+            embeddings = [data.embedding for data in reponse.data]
+            return embeddings    
+        
 
 
         def get_purpose():
             client = OpenAI(api_key=openai_api_key)
-            st.session_state.subjectcase = f"국가: {st.session_state.country}, 현재 비자: {st.session_state.visa_info}, 변경을 원하는 비자: {st.session_state.visacase}, 체류 만료일: {st.session_state.expiry_date}, 업종: {st.session_state.work}"
+            st.session_state.subjectcase = f"국가: {st.session_state.country}, 현재 비자: {st.session_state.visa_info}, 변경을 원하는 비자: {st.session_state.visacase}, 체류 만료일: {st.session_state.expiry_date}, 한국 방문 목적: {st.session_state.purpose}, 업종: {st.session_state.work}"
 
             #system 프롬프트 설정
             scenario_purpose_sys = f"당신은 외국인 근로자 상담사입니다. user은 한국에서 일하고 있는 근로자이며, 당신에게 한국에서 일하면서 필요한 정보들을 물어보고자 합니다. 사용자 정보 {st.session_state.subjectcase}를 참고해서 사용자의 국가의 언어로 친절하게 대답해주세요"
             scenario_purpose_change = "The user wants to change his/her visa. First, you need to find out the type of visa the user wants to change by asking questions. Once you have found out, tell him/her the exclusion conditions for the visa he/she wants to change and ask him/her if he/she is excluded. Ask user to answer whether user is excluded or not"
             scenario_purpose_extend = "사용자가 비자의 연장을 원하고 있습니다. 연장하고자 하는 비자의 종류와 그 방법을 출력하세요."
-            scenario_exclude = "E-7-4(e74) VISA의 제외대상: 벌금 100만원 이상의 형을 받은 자, 조세 체납자(완납 시 신청 가능), 출입국관리법 4회 이상 위반자, \
-                불법체류 경력자, 대한민국의 이익이나 공공의 안전 등을 해치는 행동을 할 염려가 있다고 인정할 만한 자, 경제질서 또는 사회질서를 해치거나 선량한 풍속 등을 해치는 행동을 할 염려가 있다고 인정할 만한 자"
-
+            scenario_exclude = "You can find the exclusion conditions and the description for the visa that user want to change in here:" + st.session_state.visarule + "\nE-7-4(e74) VISA의 제외대상: 벌금 100만원 이상의 형을 받은 자, 조세 체납자(완납 시 신청 가능), 출입국관리법 4회 이상 위반자, \
+                불법체류 경력자, 대한민국의 이익이나 공공의 안전 등을 해치는 행동을 할 염려가 있다고 인정할 만한 자, 경제질서 또는 사회질서를 해치거나 선량한 풍속 등을 해치는 행동을 할 염려가 있다고 인정할 만한 자.\n"
 
             if "messages" not in st.session_state:
                 st.session_state.messages = []
@@ -575,6 +611,21 @@ else:
                 response = check_response(prompt)
                 if st.session_state.changevisa == 1:
                     st.session_state.visacase = prompt
+                    #visa_rule 임배딩
+                    db_vectors = []
+                    db_vectors = np.array(get_embedding(st.session_state.visarule_titles))
+                    query1 = np.array(get_embedding(st.session_state.visa_info))
+                    query2 = np.array(get_embedding(st.session_state.visacase))
+                    
+                    d = db_vectors.shape[1]
+                    index = faiss.IndexFlatL2(d)
+                    index.add(db_vectors)
+                    
+                    k = 3
+                    distances, indices = index.search(query1,k)
+                    st.session_state.visarule = get_visarule_case(indices)
+                    distances, indices = index.search(query2,k)
+                    st.session_state.visacase += get_visarule_case(indices)
                     st.session_state.changevisa  = 0
                 #확인 후 대처
                 if response == "extend":
@@ -589,7 +640,7 @@ else:
                 answer = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                {"role": "system", "content": st.session_state.system_content+"사용자의 현재 비자:"+cur_visa + "사용자의 사용 언어:"+st.session_state.country}] + [
+                {"role": "system", "content": st.session_state.system_content+"사용자의 현재 비자:"+ st.session_state.visa_info + "사용자의 사용 언어:"+st.session_state.country}] + [
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
                 ],
@@ -608,14 +659,7 @@ else:
 
 
                 
-        def get_embedding(input):
-            client = OpenAI(api_key=openai_api_key)
-            reponse = client.embeddings.create(
-                input = input,
-                model = "text-embedding-3-small"
-            )
-            embeddings = [data.embedding for data in reponse.data]
-            return embeddings    
+
         def get_answer():
             client = OpenAI(api_key=openai_api_key)
             
@@ -632,28 +676,14 @@ else:
             
             
             #피상담자의 상황(국가, 현재 비자, 체류 기간, 업종)
-            st.session_state.subjectcase = f"국가: {st.session_state.country}, 현재 비자: {st.session_state.visa_info}, 변경을 원하는 비자: {st.session_state.visacase}, 체류 만료일: {st.session_state.expiry_date}, 업종: {st.session_state.work}"
+            st.session_state.subjectcase = f"국가: {st.session_state.country}, 현재 비자: {st.session_state.visa_info}, 변경을 원하는 비자: {st.session_state.visacase}, 체류 만료일: {st.session_state.expiry_date}, 한국 방문 목적: {st.session_state.purpose}업종: {st.session_state.work}"
             assistant_data = ""
             
             #제외대상자도 아니고, 점수 요건을 만족하는 경우, 
-            #비자변경 pdf가 ocr 처리되어 왔다고 가정(road_visa 함수) 후 임배딩, 원하는 비자 변경 case 역시 query 임배딩(2번 프로그램에서 받은 변경하고자 하는 비자 또는 추천받은 비자)
             if st.session_state.subject and st.session_state.score_b == '1':
-                #visa_rule 임배딩
-                #db_vectors = get_embedding(road_visa())
-                db_vectors = []
-                db_vectors = np.array(get_embedding(st.session_state.visarule))
-                query = np.array(get_embedding(st.session_state.visacase))
-                
-                d = db_vectors.shape[1]
-                index = faiss.IndexFlatL2(d)
-                index.add(db_vectors)
-                
-                k = 1
-                distances, indices = index.search(query,k)
                 qualifypoint = True
-                
-                visarule_data = f"I will tell you the current conditions and circumstances of the user and the policy related to the visa that the user wants to change. \
-                                The processing manual for the visa that needs to be changed is {st.session_state.visarule[indices[0][0]]}. Can you tell me what documents the user need to prepare now?"
+                visarule_data = f"I will tell you the current conditions and circumstances of the user and the Korea's policy related to the visa that the user wants to change. \
+                                The processing manual for the visa that needs to be changed is {st.session_state.visarule}. Can you tell me what documents the user need to prepare now?"
                 
             #제외 대상자이거나, 점수 요건을 만족하지 못하는 경우, 
             #상담사례가 크롤링 처리되어 왔다고 가정(read_consulting 함수, 리턴값:딕셔너리 리스트{content:, result:}) 후 임배딩, 피상담자의 상황 역시 query 임배딩(2번 프로그램에서 받은 변경하고자 하는 비자 또는 추천받은 비자) 
@@ -696,7 +726,7 @@ else:
                     case = consulting[i]
                     assistant_data += f"상담사례 {i+1}: 상담 제목 - {each_data['title']}, 상담 내용 - {each_data['content']}, 상담 결과 - {each_data['result']}, 관련 법령 - {each_data['law']}, 평가 및 의의 - {each_data['evaluation']} "
 
-            language_message = f"지금부터 출력하는 언어는 모두 {st.session_state.country}의 언어로 출력해줘."                
+            language_message = f"지금부터 출력하는 언어는 반드시 모두 {st.session_state.country}의 언어로 출력해줘."                
             system_message = "You are a foreign job counselor working in Korea. The user is a foreigner who came to you for consultation. \
                                 You have to perform a consultation scenario with the user. The consultation response should start with whether the foreigner can change the desired visa under the current conditions and circumstances. " 
             
@@ -710,10 +740,10 @@ else:
             
             #기본 상담
             stream1 = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": language_message},
-                    {"role": "system", "content": system_message},
+                    {"role": "system", "content": system_message + "비자정책정보: "+st.session_state.visarule},
                     {"role": "user", "content": st.session_state.subjectcase}
                 ],
                 stream = False
