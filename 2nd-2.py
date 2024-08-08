@@ -150,7 +150,7 @@ else:
             client = OpenAI(api_key=openai_api_key)
             message = "Translate the following comma-separated list " + msg + " into " + st.session_state.country + "'s language. Provide the translation as a comma-separated list without any spaces. " 
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                     {"role": "assistant", "content": message}
                 ],
@@ -306,7 +306,7 @@ else:
             message = "Please output '0' if assistant didn't guide user about the exclusion criteria.Please output '1' if assistant guided user about the exclusion criteria and user answered that he/she is excluded. Please output '2' if assistant guided user about the exclusion criteria and user answered that he/she is not excluded. Exclusion criteria:" + scenario_exclude
             data = "\nassistant와 user의 대화 데이터: "+ str(msg)
             response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-4o",
                     messages=[
                         {"role": "system", "content": message + data}] + [
                     ],
@@ -501,7 +501,7 @@ else:
             client = OpenAI(api_key=openai_api_key)
             check_sys = "당신은 외국인 근로자 상담사입니다. 서비스 이용 목적이 비자연장과 비자변경 중에 무엇인지 파악해야합니다. 사용자의 목적이 비자 연장이라고 판단되면 'extend'을 출력하고, 비자 변경이라면 'change'을 출력하세요"
             response_check = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": check_sys +  "사용자의 현재 비자:"+cur_visa + "사용자의 사용 언어:"+st.session_state.country}] +
                     [{"role": "user", "content": msg}
@@ -574,7 +574,7 @@ else:
 
                 #목적에 맞춰서 질문을 생성
                 answer = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                 {"role": "system", "content": st.session_state.system_content+"사용자의 현재 비자:"+cur_visa + "사용자의 사용 언어:"+st.session_state.country}] + [
                 {"role": m["role"], "content": m["content"]}
@@ -675,7 +675,7 @@ else:
                                 I will tell you the current conditions and circumstances of the foreigner and the policy related to the visa that the foreigner wants to change. " + assistant_data
             
             stream = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": language_message},
                     {"role": "system", "content": system_message},
