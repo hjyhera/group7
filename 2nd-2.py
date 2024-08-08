@@ -9,6 +9,7 @@ from openai import OpenAI
 import base64
 import json
 import urllib.parse
+import setuptools.dist
 
 
 cur_visa = "e9 VISA"
