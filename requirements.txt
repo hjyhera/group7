@@ -3,5 +3,3 @@ openai
 numpy
 faiss-cpu
 requests
-json
-urllib.parse
