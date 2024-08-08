@@ -148,7 +148,7 @@ else:
     if st.session_state.country:
         def translate(msg):
             client = OpenAI(api_key=openai_api_key)
-            message = "Translate the following ';'-separated list " + msg + " into " + st.session_state.country + "'s language. Provide the translation as a ';'-separated list without any spaces. If there isn't any ';', then you don't have to split it into ';'" 
+            message = "Translate the following ';'-separated list " + msg + " into " + st.session_state.country + "'s language. Provide the translation as a ';'-separated list. If there isn't any ';', then you don't have to split it into ';'" 
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
