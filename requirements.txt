@@ -2,7 +2,6 @@ streamlit
 openai
 numpy
 faiss-cpu
-faiss
 requests
 json
 urllib.parse
