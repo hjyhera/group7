@@ -1,3 +1,4 @@
+pip==24.2
 streamlit
 openai
 numpy==1.23.5
