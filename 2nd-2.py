@@ -744,7 +744,8 @@ else:
             stream1 = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": language_message+assistant_data2},
+                    {"role": "system", "content": language_message}, 
+                    {"role": "system", "content": assistant_data2},
                     {"role": "system", "content": system_message + "비자정책정보: "+st.session_state.visarule},
                     {"role": "user", "content": st.session_state.subjectcase}
                 ],
