@@ -165,7 +165,7 @@ else:
     if st.session_state.country:
         def translate(msg):
             client = OpenAI(api_key=openai_api_key)
-            message = "Translate the following ';'-separated list " + msg + " into " + st.session_state.country + "'s language and only tell me that translation. Provide the translation as a ';'-separated list. If there isn't any ';', then you don't have to split it into ';'" 
+            message = "Translate the following ';'-separated list " + msg + " into " + st.session_state.country + "'s language and only tell me that translation. Provide the translation as a ';'-separated list. If there isn't any ';', then you don't have to split it into ';'. Only tell me the result." 
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -638,7 +638,7 @@ else:
                 answer = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                {"role": "system", "content": st.session_state.system_content+"사용자의 현재 비자:"+ st.session_state.visa_info + "사용자의 사용 언어:"+st.session_state.country}] + [
+                {"role": "system", "content": st.session_state.system_content+"사용자의 현재 비자:"+ st.session_state.visa_info + ", 항상 이 언어로만 출력할 것: "+st.session_state.country}] + [
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
                 ],
