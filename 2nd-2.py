@@ -687,7 +687,7 @@ else:
             #상담사례가 크롤링 처리되어 왔다고 가정(read_consulting 함수, 리턴값:딕셔너리 리스트{content:, result:}) 후 임배딩, 피상담자의 상황 역시 query 임배딩(2번 프로그램에서 받은 변경하고자 하는 비자 또는 추천받은 비자) 
             else:
                 if st.session_state.subject == False:
-                    assistant_data = "User is currently excluded from visa change and cannot change his/her visa. This must be printed."
+                    assistant_data = "User is currently excluded from visa change and cannot change his/her visa. You must tell this one to user."
                     st.session_state.subjectcase += ", 제외 대상자: 해당"
                 if st.session_state.score_b == '2':
                     assistant_data = "User cannot change his/her visa because he/she does not meet the visa point requirement. This must be printed."
