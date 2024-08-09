@@ -663,6 +663,7 @@ else:
             
             qualifypoint = False
             assistant_data =""
+            assistant_data2 =""
             
             #점수 기준을 만족하는지의 여부 변수로 설정(get_score함수->score 점수 값으로 변경)
             if st.session_state.score >= 200 and st.session_state.score <= 800 :
