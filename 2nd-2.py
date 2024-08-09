@@ -682,17 +682,19 @@ else:
                 qualifypoint = True
                 visarule_data = f"I will tell you the current conditions and circumstances of the user and the Korea's policy related to the visa that the user wants to change. \
                                 The processing manual for the visa that needs to be changed is {st.session_state.visarule}. Can you tell me what documents the user need to prepare now?"
-                
+
             #제외 대상자이거나, 점수 요건을 만족하지 못하는 경우, 
             #상담사례가 크롤링 처리되어 왔다고 가정(read_consulting 함수, 리턴값:딕셔너리 리스트{content:, result:}) 후 임배딩, 피상담자의 상황 역시 query 임배딩(2번 프로그램에서 받은 변경하고자 하는 비자 또는 추천받은 비자) 
             else:
                 if st.session_state.subject == False:
                     assistant_data = "User is currently excluded from visa change and cannot change his/her visa. You must tell this one to user."
+                    assistant_data2 = "User is currently excluded from visa change and cannot change his/her visa. You must tell this one to user."
                     st.session_state.subjectcase += ", 제외 대상자: 해당"
                 if st.session_state.score_b == '2':
                     assistant_data = "User cannot change his/her visa because he/she does not meet the visa point requirement. This must be printed."
+                    assistant_data2 = "User is currently excluded from visa change and cannot change his/her visa. You must tell this one to user."
                     st.session_state.subjectcase += ", 점수 기준 미달 여부: 해당"
-                    
+                
                 #consulting = read_consulting()
                 consulting = st.session_state.read_consulting_result
                 db_vectors = []
@@ -740,7 +742,7 @@ else:
             stream1 = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": language_message},
+                    {"role": "system", "content": language_message+assistant_data2},
                     {"role": "system", "content": system_message + "비자정책정보: "+st.session_state.visarule},
                     {"role": "user", "content": st.session_state.subjectcase}
                 ],
