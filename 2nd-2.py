@@ -728,7 +728,7 @@ else:
                     case = consulting[i]
                     assistant_data += f"상담사례 {i+1}: 상담 제목 - {each_data['title']}, 상담 내용 - {each_data['content']}, 상담 결과 - {each_data['result']}, 관련 법령 - {each_data['law']}, 평가 및 의의 - {each_data['evaluation']} "
 
-            language_message = f"Be sure to print all the languages you are printing in the language of {st.session_state.country}."         
+            language_message = f"You must print all the messages in the language of {st.session_state.country}. If you use other languages, you will be penalized."         
             system_message = "You are a foreign job counselor working in Korea. The user is a foreigner who came to you for consultation. \
                                 You have to perform a consultation scenario with the user. The consultation response should start with whether the foreigner can change the desired visa under the current conditions and circumstances. " 
             
