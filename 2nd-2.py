@@ -14,7 +14,7 @@ from streamlit_chat import message as st_message
 if 'expiry_date' not in st.session_state:
     st.session_state.expiry_date = 0
 if 'score' not in st.session_state:
-    st.session_state.score = 800
+    st.session_state.score = 0
 #st.session_state.visarule = ["E-9 비자로 변경하기 위해서는 조건 점수가 400점 이상이어야 합니다.", "E-7-4 비자로 변경하기 위해서는 조건 점수가 800점 이상이어야 합니다.", "점수 조건을 만족하지 못하거나 제외대상자에 해당할 경우, 비자 변경이 어렵습니다."]
 if 'visarule' not in st.session_state:
     st.session_state.visarule = ""
@@ -681,6 +681,7 @@ else:
             #제외대상자도 아니고, 점수 요건을 만족하는 경우, 
             if st.session_state.subject and st.session_state.score_b == '1':
                 qualifypoint = True
+                st.session_state.subjectcase += ", 점수: " + str(st.session_state.score)
                 visarule_data = f"I will tell you the current conditions and circumstances of the user and the Korea's policy related to the visa that the user wants to change. \
                                 The processing manual for the visa that needs to be changed is {st.session_state.visarule}. Can you tell me what documents the user need to prepare now?"
 
@@ -694,7 +695,7 @@ else:
                 if st.session_state.score_b == '2':
                     assistant_data = "User cannot change his/her visa because he/she does not meet the visa point requirement. This must be printed."
                     assistant_data2 = "User is currently excluded from visa change and cannot change his/her visa. You must tell this one to user."
-                    st.session_state.subjectcase += ", 점수 기준 미달 여부: 해당"
+                    st.session_state.subjectcase += ", 점수 기준 미달 여부: 해당, 점수: " + str(st.session_state.score)
                 
                 #consulting = read_consulting()
                 consulting = st.session_state.read_consulting_result
@@ -727,7 +728,7 @@ else:
                     case = consulting[i]
                     assistant_data += f"상담사례 {i+1}: 상담 제목 - {each_data['title']}, 상담 내용 - {each_data['content']}, 상담 결과 - {each_data['result']}, 관련 법령 - {each_data['law']}, 평가 및 의의 - {each_data['evaluation']} "
 
-            language_message = f"지금부터 출력하는 언어는 반드시 모두 {st.session_state.country}의 언어로 출력해줘."                
+            language_message = f"Be sure to print all the languages you are printing in the language of {st.session_state.country}."         
             system_message = "You are a foreign job counselor working in Korea. The user is a foreigner who came to you for consultation. \
                                 You have to perform a consultation scenario with the user. The consultation response should start with whether the foreigner can change the desired visa under the current conditions and circumstances. " 
             
